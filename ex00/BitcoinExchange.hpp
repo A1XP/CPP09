@@ -8,8 +8,14 @@ class BitcoinExchange
 {
 private:
     std::map<std::string, double> data;
+
+    void fillData(const std::string& dataFile);
+    void fillLine(const std::string& line);
+    bool checkDate(const std::string& date) const;
+    bool checkRate(const std::string& rate) const;
+
 public:
-    BitcoinExchange();
+    BitcoinExchange(std::string dataFile = "data.csv");
     BitcoinExchange(const BitcoinExchange& other);
     BitcoinExchange& operator=(const BitcoinExchange& other);
     ~BitcoinExchange();
