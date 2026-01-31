@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-BitcoinExchange::BitcoinExchange(std::string dataFile)
+BitcoinExchange::BitcoinExchange(const std::string& dataFile)
 {
     fillData(dataFile);
 }
@@ -50,7 +50,7 @@ void BitcoinExchange::processFile(const std::string& inputFile) const
         size_t pipePos = line.find('|');
         if (pipePos == std::string::npos)
         {
-            std::cerr << "Invalid line: " << line << std::endl;
+            std::cout << "Invalid delimeter in line: " << line << std::endl;
             continue;   
 
         }
@@ -58,12 +58,12 @@ void BitcoinExchange::processFile(const std::string& inputFile) const
         std::string valueStr = line.substr(pipePos + 2);
         if (!checkDate(date))
         {
-            std::cerr << "Invalid date: " << date << std::endl;
+            std::cout << "Invalid date in input: " << date << std::endl;
             continue;
         }
-        if (!checkRate(valueStr))
+        if (!checkRate(valueStr, true))
         {
-            std::cerr << "Invalid value: " << valueStr << std::endl;
+            std::cout << "Invalid value in input: " << valueStr << std::endl;
             continue;
         }
         double value = std::stod(valueStr);
@@ -72,7 +72,7 @@ void BitcoinExchange::processFile(const std::string& inputFile) const
         {
             if (it == data.begin())
             {
-                std::cerr << "No exchange rate available for date: " << date << std::endl;
+                std::cout << "No exchange rate available for date: " << date << std::endl;
                 continue;
             }
             --it;
@@ -91,55 +91,70 @@ void BitcoinExchange::fillLine(const std::string& line)
 
     std::string date = line.substr(0, commaPos);
     if (!checkDate(date))
-        throw std::runtime_error("Invalid date in line: " + line);
+    {
+        std::cerr << "Invalid date in data: " << date << std::endl;
+        return;
+    }
     std::string rate = line.substr(commaPos + 1);
-    if (!checkRate(rate))
-        throw std::runtime_error("Invalid rate in line: " + line);
-
+    if (!checkRate(rate, false))
+    {
+        std::cerr << "Invalid rate in data: " << rate << std::endl;
+        return;
+    }
     data[date] = std::stod(rate);
 }
 
 bool BitcoinExchange::checkDate(const std::string& date) const
 {
-    if (date.length() != 10 || date[4] != '-' || date[7] != '-')
-        return false;
-
-    int year = std::stoi(date.substr(0, 4));
-    int month = std::stoi(date.substr(5, 2));
-    int day = std::stoi(date.substr(8, 2));
-
-    if (month < 1 || month > 12 || day < 1 || day > 31)
-        return false;
-
-    static const int daysInMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-    if (month == 2)
+    try
     {
-        bool isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-        if (isLeapYear && day > 29)
+        if (date.length() != 10 || date[4] != '-' || date[7] != '-')
             return false;
-        if (!isLeapYear && day > 28)
+
+        int year = std::stoi(date.substr(0, 4));
+        int month = std::stoi(date.substr(5, 2));
+        int day = std::stoi(date.substr(8, 2));
+
+        if (month < 1 || month > 12 || day < 1 || day > 31)
             return false;
+
+        static const int daysInMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+        if (month == 2)
+        {
+            bool isLeapYear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+            if (isLeapYear && day > 29)
+                return false;
+            if (!isLeapYear && day > 28)
+                return false;
+        }
+        else if (day > daysInMonth[month - 1])
+        {
+            return false;
+        }
+
+        return true;
     }
-    else if (day > daysInMonth[month - 1])
+    catch (const std::exception&)
     {
         return false;
     }
-
-    return true;
 }
 
-bool BitcoinExchange::checkRate(const std::string& rate) const
+bool BitcoinExchange::checkRate(const std::string& rate, bool is_input) const
 {
     try
     {
-        double value = std::stod(rate);
-        return value >= 0.0;
+        size_t pos;
+        double value = std::stod(rate, &pos);
+
+        if (pos != rate.size())
+            return false;
+        if (is_input)
+            return value >= 0.0 && value <= 1000.0;
+        else
+            return value >= 0.0;
     }
-    catch (const std::invalid_argument&)
-    {
-        return false;
-    }
-    catch (const std::out_of_range&)
+    catch (const std::exception&)
     {
         return false;
     }
