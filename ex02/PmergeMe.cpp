@@ -104,6 +104,7 @@ std::vector<size_t> PmergeMe::buildJacobsthalOrder(size_t n) const
 
 void PmergeMe::fordJohnsonVector()
 {
+     _compare_count = 0;
     _mainVector = _inputVector; 
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -116,6 +117,7 @@ void PmergeMe::fordJohnsonVector()
 
 void PmergeMe::fordJohnsonDeque()
 {
+     _compare_count = 0;
     _mainDeque = _inputDeque;
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -141,10 +143,12 @@ void PmergeMe::print() const
     std::cout << "Time to process a range of "
               << _elements_amount
               << " elements with std::vector : "
-              << _vector_time << " us" << std::endl;
+              << _vector_time << " us" << " with "
+              << _compare_count << " comparisons" << std::endl;
 
     std::cout << "Time to process a range of "
               << _elements_amount
               << " elements with std::deque  : "
-              << _deque_time << " us" << std::endl;
+              << _deque_time << " us" << " with "
+              << _compare_count << " comparisons" << std::endl;
 }

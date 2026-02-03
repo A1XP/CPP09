@@ -32,6 +32,9 @@ private:
     void print() const;
 
     template <typename Container>
+    typename Container::iterator findInsertPosition(Container& c, int value, typename Container::iterator limit);
+
+    template <typename Container>
     void recursiveFordJohnson(Container& c);
 
 private:
@@ -45,7 +48,29 @@ private:
     double _deque_time;
 
     size_t _elements_amount;
+
+    size_t _compare_count;
 };
+
+template <typename Container>
+typename Container::iterator PmergeMe::findInsertPosition(Container& c, int value, typename Container::iterator limit)
+{
+    typename Container::iterator left = c.begin();
+    typename Container::iterator right = limit;
+
+    while (left < right)
+    {
+        ++_compare_count;
+        typename Container::iterator mid = left + (std::distance(left, right) / 2);
+
+        if (value <= *mid)
+            right = mid;
+        else
+            left = mid + 1;
+    }
+
+    return left; 
+}
 
 template <typename Container>
 void PmergeMe::recursiveFordJohnson(Container& c)
@@ -53,25 +78,24 @@ void PmergeMe::recursiveFordJohnson(Container& c)
     if (c.size() <= 1)
         return;
 
-    typedef typename Container::value_type T;
-    typedef std::pair<T, T> PairT;
-
-    std::vector<PairT> pairs;
+    std::vector<Pair> pairs;
     pairs.reserve(c.size() / 2);
 
     bool hasStraggler = (c.size() % 2 != 0);
-    T straggler = T();
+    int straggler = -1;
 
     size_t i = 0;
     while (i + 1 < c.size())
     {
-        T a = c[i];
-        T b = c[i + 1];
+        int a = c[i];
+        int b = c[i + 1];
+        
+        ++_compare_count;
 
         if (a < b)
-            pairs.push_back(PairT(a, b));
+            pairs.push_back(Pair(a, b));
         else
-            pairs.push_back(PairT(b, a));
+            pairs.push_back(Pair(b, a));
 
         i += 2;
     }
@@ -90,28 +114,23 @@ void PmergeMe::recursiveFordJohnson(Container& c)
     for (size_t k = 0; k < order.size(); ++k)
     {
         size_t idx = order[k];
-        T small = pairs[idx].first;
-        T big   = pairs[idx].second;
+        int small = pairs[idx].first;
+        int big   = pairs[idx].second;
 
-        typename Container::iterator limit =
-            std::lower_bound(main.begin(), main.end(), big);
+        typename Container::iterator limit = findInsertPosition(main, big, main.end());
 
-        typename Container::iterator pos =
-            std::lower_bound(main.begin(), limit, small);
+        typename Container::iterator pos   = findInsertPosition(main, small, limit);
 
         main.insert(pos, small);
     }
 
     if (hasStraggler)
     {
-        main.insert(
-            std::lower_bound(main.begin(), main.end(), straggler),
-            straggler);
+        main.insert(findInsertPosition(main, straggler, main.end()), straggler);
     }
 
     c = main;
 }
-
 
 #endif
 
