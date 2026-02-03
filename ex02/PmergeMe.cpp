@@ -1,6 +1,5 @@
 #include "PmergeMe.hpp"
 
-#include <algorithm>
 #include <iostream>
 #include <stdexcept>
 #include <climits>
@@ -72,35 +71,35 @@ void PmergeMe::validateNumber(const std::string &s) const
     }
 }
 
-std::vector<size_t> PmergeMe::buildJacobsthalOrder(size_t n) const
-{
-    std::vector<size_t> jacob;
-    std::vector<size_t> order;
+// std::vector<size_t> PmergeMe::buildJacobsthalOrder(size_t n) const
+// {
+//     std::vector<size_t> jacob;
+//     std::vector<size_t> order;
 
-    jacob.push_back(0);
-    jacob.push_back(1);
+//     jacob.push_back(0);
+//     jacob.push_back(1);
 
-    while (jacob.back() < n)
-    {
-        size_t size = jacob.size();
-        jacob.push_back(jacob[size - 1] + 2 * jacob[size - 2]);
-    }
+//     while (jacob.back() < n)
+//     {
+//         size_t size = jacob.size();
+//         jacob.push_back(jacob[size - 1] + 2 * jacob[size - 2]);
+//     }
 
-    size_t prev = 0;
-    for (size_t i = 1; i < jacob.size(); ++i)
-    {
-        size_t curr = jacob[i];
-        if (curr > n)
-            curr = n;
+//     size_t prev = 0;
+//     for (size_t i = 1; i < jacob.size(); ++i)
+//     {
+//         size_t curr = jacob[i];
+//         if (curr > n)
+//             curr = n;
 
-        for (size_t j = curr; j > prev; --j)
-            order.push_back(j - 1);
+//         for (size_t j = curr; j > prev; --j)
+//             order.push_back(j - 1);
 
-        prev = curr;
-    }
+//         prev = curr;
+//     }
 
-    return order;
-}
+//     return order;
+// }
 
 void PmergeMe::fordJohnsonVector()
 {
@@ -109,7 +108,7 @@ void PmergeMe::fordJohnsonVector()
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    recursiveFordJohnson(_mainVector);
+    fordJohnson(_mainVector);
 
     auto end = std::chrono::high_resolution_clock::now();
     _vector_time = std::chrono::duration<double, std::micro>(end - start).count();
@@ -122,7 +121,7 @@ void PmergeMe::fordJohnsonDeque()
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    recursiveFordJohnson(_mainDeque);
+    fordJohnson(_mainDeque);
 
     auto end = std::chrono::high_resolution_clock::now();
     _deque_time = std::chrono::duration<double, std::micro>(end - start).count();
@@ -130,15 +129,15 @@ void PmergeMe::fordJohnsonDeque()
 
 void PmergeMe::print() const
 {
-    std::cout << "Before:";
-    for (size_t i = 0; i < _inputVector.size(); ++i)
-        std::cout << " " << _inputVector[i];
-    std::cout << std::endl;
+    // std::cout << "Before:";
+    // for (size_t i = 0; i < _inputVector.size(); ++i)
+    //     std::cout << " " << _inputVector[i];
+    // std::cout << std::endl;
 
-    std::cout << "After:";
-    for (size_t i = 0; i < _mainVector.size(); ++i)
-        std::cout << " " << _mainVector[i];
-    std::cout << std::endl;
+    // std::cout << "After:";
+    // for (size_t i = 0; i < _mainVector.size(); ++i)
+    //     std::cout << " " << _mainVector[i];
+    // std::cout << std::endl;
 
     std::cout << "Time to process a range of "
               << _elements_amount
