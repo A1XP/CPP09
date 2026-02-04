@@ -23,9 +23,6 @@ private:
 
     typedef std::pair<int, int> Pair;
 
-    typedef std::pair<int, size_t> ValueWithIndex;  // (value, original_pair_index)
-    
-
     void parseInput(int argc, char **argv);
     void validateNumber(const std::string &s) const;
 
@@ -42,10 +39,10 @@ private:
     template <typename Container>
     void fordJohnson(Container& c);
 
-   template <typename Container>
-    typename Container::iterator boundedInsert(Container& c, int value, typename Container::iterator limit);
+    template <typename Container>
+    bool isSorted(const Container &c) const;
 
-    private:
+private:
     std::vector<int> _inputVector;
     std::deque<int>  _inputDeque;
 
@@ -93,26 +90,6 @@ private:
 
 template <typename Container>
 typename Container::iterator PmergeMe::findInsertPosition(Container& c, int value, typename Container::iterator limit)
-{
-    typename Container::iterator left = c.begin();
-    typename Container::iterator right = limit;
-
-    while (left < right)
-    {
-        ++_compare_count;
-        typename Container::iterator mid =
-            left + (std::distance(left, right) / 2);
-
-        if (value <= *mid)
-            right = mid;
-        else
-            left = mid + 1;
-    }
-    return left;
-}
-
-template <typename Container>
-typename Container::iterator PmergeMe::boundedInsert(Container& c, int value, typename Container::iterator limit)
 {
     typename Container::iterator left = c.begin();
     typename Container::iterator right = limit;
@@ -182,7 +159,7 @@ void PmergeMe::fordJohnson(Container& c)
     for (size_t idx : order)
     {
         typename Container::iterator limit = main.begin() + b_pos[idx];
-        typename Container::iterator pos = boundedInsert(main, pairs[idx].first, limit);
+        typename Container::iterator pos = findInsertPosition(main, pairs[idx].first, limit);
         size_t ins_idx = std::distance(main.begin(), pos);
         main.insert(pos, pairs[idx].first);
 
@@ -200,7 +177,7 @@ void PmergeMe::fordJohnson(Container& c)
         if (std::find(order.begin(), order.end(), i) == order.end())
         {
             typename Container::iterator limit = main.begin() + b_pos[i];
-            typename Container::iterator pos = boundedInsert(main, pairs[i].first, limit);
+            typename Container::iterator pos = findInsertPosition(main, pairs[i].first, limit);
             size_t ins_idx = std::distance(main.begin(), pos);
             main.insert(pos, pairs[i].first);
 
@@ -215,12 +192,30 @@ void PmergeMe::fordJohnson(Container& c)
     /* 7. Вставляем оставшийся элемент, если он есть */
     if (has_straggler)
     {
-        typename Container::iterator pos = boundedInsert(main, straggler, main.end());
+        typename Container::iterator pos = findInsertPosition(main, straggler, main.end());
         main.insert(pos, straggler);
     }
 
     /* 8. Копируем результат обратно */
     c = main;
+}
+
+template <typename Container>
+bool PmergeMe::isSorted(const Container &c) const
+{
+    if (c.size() < 2)
+        return true;
+
+    typename Container::const_iterator it = c.begin();
+    typename Container::const_iterator next = it;
+    ++next;
+
+    for (; next != c.end(); ++it, ++next)
+    {
+        if (*next < *it)
+            return false;
+    }
+    return true;
 }
 
 #endif

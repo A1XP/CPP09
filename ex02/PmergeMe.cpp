@@ -150,11 +150,13 @@ void PmergeMe::print() const
               << _elements_amount
               << " elements with std::vector : "
               << _vector_time << " us" << " with "
-              << _compare_count << " comparisons" << std::endl;
+              << _compare_count << " comparisons. Sorted: " 
+              << isSorted(_mainVector) << std::endl;
 
     std::cout << "Time to process a range of "
               << _elements_amount
               << " elements with std::deque  : "
               << _deque_time << " us" << " with "
-              << _compare_count << " comparisons" << std::endl;
+              << _compare_count << " comparisons. Sorted: " 
+              << isSorted(_mainDeque) << std::endl;
 }
