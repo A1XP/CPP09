@@ -42,7 +42,10 @@ private:
     template <typename Container>
     void fordJohnson(Container& c);
 
-private:
+   template <typename Container>
+    typename Container::iterator boundedInsert(Container& c, int value, typename Container::iterator limit);
+
+    private:
     std::vector<int> _inputVector;
     std::deque<int>  _inputDeque;
 
@@ -109,6 +112,26 @@ typename Container::iterator PmergeMe::findInsertPosition(Container& c, int valu
 }
 
 template <typename Container>
+typename Container::iterator PmergeMe::boundedInsert(Container& c, int value, typename Container::iterator limit)
+{
+    typename Container::iterator left = c.begin();
+    typename Container::iterator right = limit;
+
+    while (left < right)
+    {
+        ++_compare_count;
+        typename Container::iterator mid =
+            left + (std::distance(left, right) / 2);
+
+        if (value <= *mid)
+            right = mid;
+        else
+            left = mid + 1;
+    }
+    return left;
+}
+
+template <typename Container>
 void PmergeMe::fordJohnson(Container& c)
 {
     if (c.size() <= 1)
@@ -125,7 +148,7 @@ void PmergeMe::fordJohnson(Container& c)
         if (c[i] < c[i + 1])
             pairs.push_back(Pair(c[i], c[i+1])); // a < b
         else
-            pairs.push_back(Pair(c[i + 1], c[i]));
+            pairs.push_back(Pair(c[i+1], c[i]));
     }
 
     if (has_straggler)
@@ -134,7 +157,7 @@ void PmergeMe::fordJohnson(Container& c)
     /* 2. Сортируем большие элементы (bᵢ) рекурсивно */
     Container main;
     for (size_t i = 0; i < pairs.size(); ++i)
-        main.push_back(pairs[i].first);
+        main.push_back(pairs[i].second);
 
     fordJohnson(main);
 
