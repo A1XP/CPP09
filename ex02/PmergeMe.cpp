@@ -65,6 +65,37 @@ void PmergeMe::parseInput(int argc, char **argv)
     _elements_amount = argc - 1;
 }
 
+std::vector<size_t> PmergeMe::buildJacobsthalOrder(size_t n) const
+{
+    std::vector<size_t> jacob;
+    std::vector<size_t> order;
+
+    jacob.push_back(0);
+    jacob.push_back(1);
+
+    while (jacob.back() < n)
+    {
+        size_t size = jacob.size();
+        jacob.push_back(jacob[size - 1] + 2 * jacob[size - 2]);
+    }
+
+    size_t prev = 0;
+    for (size_t i = 1; i < jacob.size(); ++i)
+    {
+        size_t curr = jacob[i];
+        if (curr > n)
+            curr = n;
+
+        for (size_t j = curr; j > prev; --j)
+            order.push_back(j - 1);
+
+        prev = curr;
+    }
+
+    return order;
+}
+
+
 void PmergeMe::validateNumber(const std::string &s) const
 {
     if (s.empty())
@@ -75,33 +106,6 @@ void PmergeMe::validateNumber(const std::string &s) const
         if (!std::isdigit(s[i]))
             throw std::runtime_error("Error");
     }
-}
-
-size_t PmergeMe::jacobsthal(size_t n)
-{
-    if (n == 0) return 0;
-    if (n == 1) return 1;
-    size_t j0 = 0, j1 = 1, j2;
-    for (size_t i = 2; i <= n; ++i)
-    {
-        j2 = j1 + 2 * j0;
-        j0 = j1;
-        j1 = j2;
-    }
-    return j1;
-}
-
-std::vector<size_t> PmergeMe::jacobsthalRanges(size_t n)
-{
-    std::vector<size_t> ranges;
-    for (size_t k = 2;; ++k)
-    {
-        size_t j = jacobsthal(k);
-        if (j >= n)
-            break;
-        ranges.push_back(j);
-    }
-    return ranges;
 }
 
 void PmergeMe::fordJohnsonVector()
