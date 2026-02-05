@@ -79,7 +79,7 @@ std::vector<size_t> PmergeMe::buildJacobsthalOrder(size_t n) const
         jacob.push_back(jacob[size - 1] + 2 * jacob[size - 2]);
     }
 
-    size_t prev = 0;
+    size_t prev = 1;
     for (size_t i = 1; i < jacob.size(); ++i)
     {
         size_t curr = jacob[i];
@@ -151,12 +151,14 @@ void PmergeMe::print() const
               << " elements with std::vector : "
               << _vector_time << " us" << " with "
               << _compare_count << " comparisons. Sorted: " 
-              << isSorted(_mainVector) << std::endl;
+              << isSorted(_mainVector)
+              << " with size " << _mainVector.size() << std::endl;
 
     std::cout << "Time to process a range of "
               << _elements_amount
               << " elements with std::deque  : "
               << _deque_time << " us" << " with "
               << _compare_count << " comparisons. Sorted: " 
-              << isSorted(_mainDeque) << std::endl;
+              << isSorted(_mainDeque)
+              << " with size " << _mainDeque.size() << std::endl;
 }
