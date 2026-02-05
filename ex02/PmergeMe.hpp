@@ -166,32 +166,32 @@ void PmergeMe::fordJohnson(Container& c)
     for (size_t j = 0; j < b_pos.size(); ++j)
         ++b_pos[j];
 
-    {
-    std::cout << "\nPositions of pairs before inserting:";
+    
+    std::cout << "\nPairs before inserting:";
     for (size_t i = 0; i < pairs.size(); ++i)
         {
             std::cout << pairs[i].first << "|" << pairs[i].second << " ";
         }
     std::cout << std::endl;
-    }
+    
 
-    {
-    std::cout << "\nPositions of main before inserting:";
+    
+    std::cout << "\nMain before inserting:";
     for (size_t i = 0; i < main.size(); ++i)
         {
             std::cout << main[i] << " ";
         }
     std::cout << std::endl;
-    }
+    
 
-    {
+    
     std::cout << "\nPositions of bᵢ before inserting:";
     for (size_t i = 0; i < b_pos.size(); ++i)
         {
             std::cout << b_pos[i] << " ";
         }
     std::cout << std::endl;
-    }
+    
 
     /* 4. Определяем порядок вставки маленьких элементов aᵢ через Jacobsthal */
     std::vector<size_t> order = buildJacobsthalOrder(pairs.size());
@@ -275,6 +275,14 @@ void PmergeMe::fordJohnson(Container& c)
         typename Container::iterator pos = findInsertPosition(main, straggler, main.end());
         main.insert(pos, straggler);
     }
+
+    std::cout << "\nFinalmain :";
+    for (size_t i = 0; i < main.size(); ++i)
+        {
+            std::cout << main[i] << " ";
+        }
+    std::cout << std::endl;
+    
 
     /* 8. Копируем результат обратно */
     c = main;
