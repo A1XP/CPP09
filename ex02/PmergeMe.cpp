@@ -79,7 +79,7 @@ std::vector<size_t> PmergeMe::buildJacobsthalOrder(size_t n) const
         jacob.push_back(jacob[size - 1] + 2 * jacob[size - 2]);
     }
 
-    size_t prev = 1;
+    size_t prev = 0;
     for (size_t i = 1; i < jacob.size(); ++i)
     {
         size_t curr = jacob[i];

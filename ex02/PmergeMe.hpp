@@ -138,8 +138,23 @@ void PmergeMe::fordJohnson(Container& c)
 
     fordJohnson(main);
 
+
+    //add a0 element to the beginning of main
+
+    for (size_t j = 0; j < pairs.size(); ++j)
+    {
+        if (main[0] == pairs[j].second)
+        {
+            main.insert(main.begin(), pairs[j].first);
+            pairs.erase(pairs.begin() + j);
+            break;
+        }
+    }
+
     /* 3. Строим карту позиций больших элементов bᵢ */
+
     std::vector<size_t> b_pos(pairs.size());
+
     for (size_t i = 0; i < main.size(); ++i)
     {
         for (size_t j = 0; j < pairs.size(); ++j)
@@ -152,38 +167,19 @@ void PmergeMe::fordJohnson(Container& c)
         }
     }
 
-
-
-    for (size_t j = 0; j < pairs.size(); ++j)
-    {
-        if (main[0] == pairs[j].second)
-        {
-            main.insert(main.begin(), pairs[j].first);
-            break;
-        }
-    }
-
-    for (size_t j = 0; j < b_pos.size(); ++j)
-        ++b_pos[j];
-
-    
     std::cout << "\nPairs before inserting:";
     for (size_t i = 0; i < pairs.size(); ++i)
         {
             std::cout << pairs[i].first << "|" << pairs[i].second << " ";
         }
     std::cout << std::endl;
-    
 
-    
     std::cout << "\nMain before inserting:";
     for (size_t i = 0; i < main.size(); ++i)
         {
             std::cout << main[i] << " ";
         }
     std::cout << std::endl;
-    
-
     
     std::cout << "\nPositions of bᵢ before inserting:";
     for (size_t i = 0; i < b_pos.size(); ++i)
@@ -192,7 +188,6 @@ void PmergeMe::fordJohnson(Container& c)
         }
     std::cout << std::endl;
     
-
     /* 4. Определяем порядок вставки маленьких элементов aᵢ через Jacobsthal */
     std::vector<size_t> order = buildJacobsthalOrder(pairs.size());
 
@@ -206,27 +201,6 @@ void PmergeMe::fordJohnson(Container& c)
     /* 5. Вставляем маленькие элементы aᵢ в правильном порядке */
     for (size_t idx : order)
     {
-        // if (idx == 0)
-        // {
-        //     main.insert(main.begin(), pairs[0].first);
-        //     for (size_t j = 0; j < b_pos.size(); ++j)
-        //     {
-        //             ++b_pos[j];
-        //     }
-        //     {
-        //         std::cout << "Positions of bᵢ after inserting 0"  << std::endl;
-        //         for (size_t i = 0; i < b_pos.size(); ++i)
-        //             {
-        //                 std::cout << b_pos[i] << " ";
-        //             }
-        //         std::cout << std::endl;
-        //     }   
-        //     continue;
-        // }
-        if (pairs[idx].second == main[1])
-            continue;
-
-
         typename Container::iterator limit = main.begin() + b_pos[idx];
         typename Container::iterator pos = findInsertPosition(main, pairs[idx].first, limit);
         size_t ins_idx = std::distance(main.begin(), pos);
