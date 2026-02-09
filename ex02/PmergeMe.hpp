@@ -1,6 +1,7 @@
 #ifndef PMERGEME_HPP
 #define PMERGEME_HPP
 
+#include <codecvt>
 #include <vector>
 #include <deque>
 #include <string>
@@ -34,7 +35,7 @@ private:
     void print() const;
 
     template <typename Container>
-    typename Container::iterator findInsertPosition(Container& c, int value, typename Container::iterator limit);
+    typename Container::iterator findInsertPosition(Container& c, int value, typename Container::iterator limit, bool isStraggler);
 
     template <typename Container>
     void fordJohnson(Container& c);
@@ -89,14 +90,43 @@ private:
 // }
 
 template <typename Container>
-typename Container::iterator PmergeMe::findInsertPosition(Container& c, int value, typename Container::iterator limit)
+typename Container::iterator PmergeMe::findInsertPosition(Container& c, int value, typename Container::iterator limit, bool isStraggler)
 {
+    (void)isStraggler;
     typename Container::iterator left = c.begin();
+    // if (!isStraggler)
+    //     if (left != c.end())
+    //         ++left;
+
     typename Container::iterator right = limit;
+
+    auto dist = std::distance(left, right);
+
+    if (dist == 0)
+        return left;
+
+    if (dist == 1)
+    {
+        ++_compare_count;
+        if (value <= *left)
+            return left;
+        return left + 1;
+    }
+
+    if (dist == 2)
+    {
+        ++_compare_count;
+        if (value <= *(left + 1))
+            return (value <= *left ? left : left + 1);
+        return left + 2;
+    }
+
+    int local_compare = 0;
 
     while (left < right)
     {
         ++_compare_count;
+        ++local_compare;
         typename Container::iterator mid =
             left + (std::distance(left, right) / 2);
 
@@ -105,6 +135,9 @@ typename Container::iterator PmergeMe::findInsertPosition(Container& c, int valu
         else
             left = mid + 1;
     }
+
+    std::cout << "For value: " << value << " we compared " << local_compare << " times, total compares: " << _compare_count << std::endl;
+
     return left;
 }
 
@@ -122,6 +155,7 @@ void PmergeMe::fordJohnson(Container& c)
     for (size_t i = 0; i + 1 < c.size(); i += 2)
     {
         ++_compare_count;
+        std::cout << "Comparing " << c[i] << " and " << c[i + 1] << std::endl;
         if (c[i] < c[i + 1])
             pairs.push_back(Pair(c[i], c[i+1])); // a < b
         else
@@ -167,45 +201,45 @@ void PmergeMe::fordJohnson(Container& c)
         }
     }
 
-    std::cout << "\nPairs before inserting:";
-    for (size_t i = 0; i < pairs.size(); ++i)
-        {
-            std::cout << pairs[i].first << "|" << pairs[i].second << " ";
-        }
-    std::cout << std::endl;
+    // std::cout << "\nPairs before inserting:";
+    // for (size_t i = 0; i < pairs.size(); ++i)
+    //     {
+    //         std::cout << pairs[i].first << "|" << pairs[i].second << " ";
+    //     }
+    // std::cout << std::endl;
 
-    std::cout << "\nMain before inserting:";
-    for (size_t i = 0; i < main.size(); ++i)
-        {
-            std::cout << main[i] << " ";
-        }
-    std::cout << std::endl;
+    // std::cout << "\nMain before inserting:";
+    // for (size_t i = 0; i < main.size(); ++i)
+    //     {
+    //         std::cout << main[i] << " ";
+    //     }
+    // std::cout << std::endl;
     
-    std::cout << "\nPositions of bᵢ before inserting:";
-    for (size_t i = 0; i < b_pos.size(); ++i)
-        {
-            std::cout << b_pos[i] << " ";
-        }
-    std::cout << std::endl;
+    // std::cout << "\nPositions of bᵢ before inserting:";
+    // for (size_t i = 0; i < b_pos.size(); ++i)
+    //     {
+    //         std::cout << b_pos[i] << " ";
+    //     }
+    // std::cout << std::endl;
     
     /* 4. Определяем порядок вставки маленьких элементов aᵢ через Jacobsthal */
     std::vector<size_t> order = buildJacobsthalOrder(pairs.size());
 
-    std::cout << "Jacobsthal order for " << pairs.size() << " pairs: ";
-    for (size_t i = 0; i < order.size(); ++i)
-    {
-        std::cout << order[i] << " ";
-    }
-    std::cout << std::endl;
+    // std::cout << "Jacobsthal order for " << pairs.size() << " pairs: ";
+    // for (size_t i = 0; i < order.size(); ++i)
+    // {
+    //     std::cout << order[i] << " ";
+    // }
+    // std::cout << std::endl;
 
     /* 5. Вставляем маленькие элементы aᵢ в правильном порядке */
     for (size_t idx : order)
     {
         typename Container::iterator limit = main.begin() + b_pos[idx];
-        typename Container::iterator pos = findInsertPosition(main, pairs[idx].first, limit);
+        typename Container::iterator pos = findInsertPosition(main, pairs[idx].first, limit, false);
         size_t ins_idx = std::distance(main.begin(), pos);
-        if (idx == 0)
-            std::cout << "Inserting a[" << idx << "] = " << pairs[idx].first << " at position " << std::distance(main.begin(), pos) <<  " and ins_index " << ins_idx << std::endl;
+        // if (idx == 0)
+        //     std::cout << "Inserting a[" << idx << "] = " << pairs[idx].first << " at position " << std::distance(main.begin(), pos) <<  " and ins_index " << ins_idx << std::endl;
         main.insert(pos, pairs[idx].first);
 
         // обновляем позиции всех больших элементов после вставки
@@ -215,14 +249,14 @@ void PmergeMe::fordJohnson(Container& c)
                 ++b_pos[j];
         }
         // if (idx >= 0)
-        {
-            std::cout << "Positions of bᵢ after inserting a[" << idx << "]: " << pairs[idx].first << std::endl;
-            for (size_t i = 0; i < b_pos.size(); ++i)
-                {
-                    std::cout << b_pos[i] << " ";
-                }
-            std::cout << std::endl;
-        }
+        // {
+        //     std::cout << "Positions of bᵢ after inserting a[" << idx << "]: " << pairs[idx].first << std::endl;
+        //     for (size_t i = 0; i < b_pos.size(); ++i)
+        //         {
+        //             std::cout << b_pos[i] << " ";
+        //         }
+        //     std::cout << std::endl;
+        // }
     }
 
     // /* 6. Вставляем оставшиеся aᵢ, которые не попали в Jacobsthal порядок */
@@ -246,16 +280,16 @@ void PmergeMe::fordJohnson(Container& c)
     /* 7. Вставляем оставшийся элемент, если он есть */
     if (has_straggler)
     {
-        typename Container::iterator pos = findInsertPosition(main, straggler, main.end());
+        typename Container::iterator pos = findInsertPosition(main, straggler, main.end(), true);
         main.insert(pos, straggler);
     }
 
-    std::cout << "\nFinalmain :";
-    for (size_t i = 0; i < main.size(); ++i)
-        {
-            std::cout << main[i] << " ";
-        }
-    std::cout << std::endl;
+    // std::cout << "\nFinalmain :";
+    // for (size_t i = 0; i < main.size(); ++i)
+    //     {
+    //         std::cout << main[i] << " ";
+    //     }
+    // std::cout << std::endl;
     
 
     /* 8. Копируем результат обратно */
