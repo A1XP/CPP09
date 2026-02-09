@@ -1,9 +1,9 @@
 #include "PmergeMe.hpp"
 
-#include <iostream>
 #include <stdexcept>
 #include <climits>
 #include <chrono>
+#include <iostream>
 
 PmergeMe::PmergeMe() : _elements_amount(0) {}
 
@@ -54,7 +54,7 @@ void PmergeMe::parseInput(int argc, char **argv)
 
         long value = std::strtol(argv[i], NULL, 10);
         if (value < 0 || value > INT_MAX)
-            throw std::runtime_error("Error");
+            throw std::runtime_error("Number out of range");
 
         _inputVector.push_back(static_cast<int>(value));
         _inputDeque.push_back(static_cast<int>(value));
@@ -93,16 +93,15 @@ std::vector<size_t> PmergeMe::buildJacobsthalOrder(size_t n) const
     return order;
 }
 
-
 void PmergeMe::validateNumber(const std::string &s) const
 {
     if (s.empty())
-        throw std::runtime_error("Error");
+        throw std::runtime_error("Empty string");
 
     for (size_t i = 0; i < s.size(); ++i)
     {
         if (!std::isdigit(s[i]))
-            throw std::runtime_error("Error");
+            throw std::runtime_error("Invalid character");
     }
 }
 
@@ -115,6 +114,7 @@ void PmergeMe::fordJohnsonVector()
     fordJohnson(_mainVector);
 
     auto end = std::chrono::high_resolution_clock::now();
+
     _vector_time = std::chrono::duration<double, std::micro>(end - start).count();
 }
 
@@ -127,6 +127,7 @@ void PmergeMe::fordJohnsonDeque()
     fordJohnson(_mainDeque);
 
     auto end = std::chrono::high_resolution_clock::now();
+
     _deque_time = std::chrono::duration<double, std::micro>(end - start).count();
 }
 

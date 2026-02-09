@@ -37,9 +37,6 @@ private:
     template <typename Container>
     void fordJohnson(Container& c);
 
-    template <typename Container>
-    bool isSorted(const Container &c) const;
-
 private:
     std::vector<int> _inputVector;
     std::deque<int>  _inputDeque;
@@ -53,31 +50,11 @@ private:
     size_t _elements_amount;
 };
 
-
 template <typename Container>
 typename Container::iterator PmergeMe::findInsertPosition(Container& c, int value, typename Container::iterator limit)
 {
     typename Container::iterator left = c.begin();
     typename Container::iterator right = limit;
-
-    auto dist = std::distance(left, right);
-
-    if (dist == 0)
-        return left;
-
-    if (dist == 1)
-    {
-        if (value <= *left)
-            return left;
-        return left + 1;
-    }
-
-    if (dist == 2)
-    {
-        if (value <= *(left + 1))
-            return (value <= *left ? left : left + 1);
-        return left + 2;
-    }
 
     while (left < right)
     {
@@ -99,15 +76,14 @@ void PmergeMe::fordJohnson(Container& c)
     if (c.size() <= 1)
         return;
 
-    /* 1. Пары (a < b) */
     std::vector<Pair> pairs;
     bool has_straggler = (c.size() % 2 != 0);
     int straggler = 0;
 
     for (size_t i = 0; i + 1 < c.size(); i += 2)
     {
-        if (c[i] < c[i + 1])
-            pairs.push_back(Pair(c[i], c[i+1])); // a < b
+        if (c[i] > c[i + 1])
+            pairs.push_back(Pair(c[i], c[i+1]));
         else
             pairs.push_back(Pair(c[i+1], c[i]));
     }
@@ -117,29 +93,29 @@ void PmergeMe::fordJohnson(Container& c)
 
     Container main;
     for (size_t i = 0; i < pairs.size(); ++i)
-        main.push_back(pairs[i].second);
+        main.push_back(pairs[i].first);
 
     fordJohnson(main);
 
     for (size_t j = 0; j < pairs.size(); ++j)
     {
-        if (main[0] == pairs[j].second)
+        if (main[0] == pairs[j].first)
         {
-            main.insert(main.begin(), pairs[j].first);
+            main.insert(main.begin(), pairs[j].second);
             pairs.erase(pairs.begin() + j);
             break;
         }
     }
 
-    std::vector<size_t> b_pos(pairs.size());
+    std::vector<size_t> a_pos(pairs.size());
 
     for (size_t i = 0; i < main.size(); ++i)
     {
         for (size_t j = 0; j < pairs.size(); ++j)
         {
-            if (main[i] == pairs[j].second)
+            if (main[i] == pairs[j].first)
             {
-                b_pos[j] = i;
+                a_pos[j] = i;
                 break;
             }
         }
@@ -149,20 +125,18 @@ void PmergeMe::fordJohnson(Container& c)
 
     for (size_t idx : order)
     {
-        typename Container::iterator limit = main.begin() + b_pos[idx];
-        typename Container::iterator pos = findInsertPosition(main, pairs[idx].first, limit);
+        typename Container::iterator limit = main.begin() + a_pos[idx];
+        typename Container::iterator pos = findInsertPosition(main, pairs[idx].second, limit);
         size_t ins_idx = std::distance(main.begin(), pos);
 
-        main.insert(pos, pairs[idx].first);
+        main.insert(pos, pairs[idx].second);
 
-
-        for (size_t j = 0; j < b_pos.size(); ++j)
+        for (size_t j = 0; j < a_pos.size(); ++j)
         {
-            if (b_pos[j] >= ins_idx)
-                ++b_pos[j];
+            if (a_pos[j] >= ins_idx)
+                ++a_pos[j];
         }
     }
-
 
     if (has_straggler)
     {
@@ -173,23 +147,4 @@ void PmergeMe::fordJohnson(Container& c)
     c = main;
 }
 
-template <typename Container>
-bool PmergeMe::isSorted(const Container &c) const
-{
-    if (c.size() < 2)
-        return true;
-
-    typename Container::const_iterator it = c.begin();
-    typename Container::const_iterator next = it;
-    ++next;
-
-    for (; next != c.end(); ++it, ++next)
-    {
-        if (*next < *it)
-            return false;
-    }
-    return true;
-}
-
 #endif
-
