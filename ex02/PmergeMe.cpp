@@ -5,7 +5,7 @@
 #include <climits>
 #include <chrono>
 
-PmergeMe::PmergeMe() : _elements_amount(0), _compare_count(0) {}
+PmergeMe::PmergeMe() : _elements_amount(0) {}
 
 PmergeMe::PmergeMe(const PmergeMe &other)
     : _inputVector(other._inputVector),
@@ -14,8 +14,7 @@ PmergeMe::PmergeMe(const PmergeMe &other)
       _mainDeque(other._mainDeque),
       _vector_time(other._vector_time),
       _deque_time(other._deque_time),
-      _elements_amount(other._elements_amount),
-      _compare_count(other._compare_count) {}
+      _elements_amount(other._elements_amount) {}
 
 PmergeMe &PmergeMe::operator=(const PmergeMe &other)
 {
@@ -28,7 +27,6 @@ PmergeMe &PmergeMe::operator=(const PmergeMe &other)
         _vector_time = other._vector_time;
         _deque_time  = other._deque_time;
         _elements_amount = other._elements_amount;
-        _compare_count = other._compare_count;
     }
     return *this;
 }
@@ -110,7 +108,6 @@ void PmergeMe::validateNumber(const std::string &s) const
 
 void PmergeMe::fordJohnsonVector()
 {
-     _compare_count = 0;
     _mainVector = _inputVector; 
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -123,7 +120,6 @@ void PmergeMe::fordJohnsonVector()
 
 void PmergeMe::fordJohnsonDeque()
 {
-     _compare_count = 0;
     _mainDeque = _inputDeque;
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -149,16 +145,10 @@ void PmergeMe::print() const
     std::cout << "Time to process a range of "
               << _elements_amount
               << " elements with std::vector : "
-              << _vector_time << " us" << " with "
-              << _compare_count << " comparisons. Sorted: " 
-              << isSorted(_mainVector)
-              << " with size " << _mainVector.size() << std::endl;
+              << _vector_time << " us" << std::endl;
 
     std::cout << "Time to process a range of "
               << _elements_amount
               << " elements with std::deque  : "
-              << _deque_time << " us" << " with "
-              << _compare_count << " comparisons. Sorted: " 
-              << isSorted(_mainDeque)
-              << " with size " << _mainDeque.size() << std::endl;
+              << _deque_time << " us" << std::endl;
 }

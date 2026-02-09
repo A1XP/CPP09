@@ -51,15 +51,12 @@ private:
     double _deque_time;
 
     size_t _elements_amount;
-
-    size_t _compare_count;
 };
 
 
 template <typename Container>
 typename Container::iterator PmergeMe::findInsertPosition(Container& c, int value, typename Container::iterator limit)
 {
-
     typename Container::iterator left = c.begin();
     typename Container::iterator right = limit;
 
@@ -70,7 +67,6 @@ typename Container::iterator PmergeMe::findInsertPosition(Container& c, int valu
 
     if (dist == 1)
     {
-        ++_compare_count;
         if (value <= *left)
             return left;
         return left + 1;
@@ -78,18 +74,13 @@ typename Container::iterator PmergeMe::findInsertPosition(Container& c, int valu
 
     if (dist == 2)
     {
-        ++_compare_count;
         if (value <= *(left + 1))
             return (value <= *left ? left : left + 1);
         return left + 2;
     }
 
-    int local_compare = 0;
-
     while (left < right)
     {
-        ++_compare_count;
-        ++local_compare;
         typename Container::iterator mid =
             left + (std::distance(left, right) / 2);
 
@@ -115,7 +106,6 @@ void PmergeMe::fordJohnson(Container& c)
 
     for (size_t i = 0; i + 1 < c.size(); i += 2)
     {
-        ++_compare_count;
         if (c[i] < c[i + 1])
             pairs.push_back(Pair(c[i], c[i+1])); // a < b
         else
