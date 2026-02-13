@@ -38,7 +38,7 @@ void PmergeMe::sort(int argc, char **argv)
     parseInput(argc, argv);
 
     fordJohnsonVector();
-    // fordJohnsonDeque();
+    fordJohnsonDeque();
 
     print();
 }

@@ -67,7 +67,7 @@ typename Container::iterator PmergeMe::findInsertPosition(Container& c, int valu
         ++_compare_count;
         typename Container::iterator mid =
             left + (std::distance(left, right) / 2);
-        std ::cout << "Comparing " << value << " with " << *mid << std::endl;
+
         if (value < *mid)
             right = mid;
         else
