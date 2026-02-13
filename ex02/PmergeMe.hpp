@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include <cstddef>
+#include <iostream>
 
 class PmergeMe
 {
@@ -37,6 +38,9 @@ private:
     template <typename Container>
     void fordJohnson(Container& c);
 
+    template <typename Container>
+    bool isSorted(const Container &c) const;
+
 private:
     std::vector<int> _inputVector;
     std::deque<int>  _inputDeque;
@@ -48,6 +52,7 @@ private:
     double _deque_time;
 
     size_t _elements_amount;
+    size_t _compare_count;
 };
 
 template <typename Container>
@@ -58,14 +63,18 @@ typename Container::iterator PmergeMe::findInsertPosition(Container& c, int valu
 
     while (left < right)
     {
+        ++_compare_count;
+        std::cout << "std::distance(left, right)" << std::distance(left, right) << std::endl;
         typename Container::iterator mid =
             left + (std::distance(left, right) / 2);
-
-        if (value <= *mid)
+        std ::cout << "Comparing " << value << " with " << *mid << std::endl;
+        if (value < *mid)
             right = mid;
         else
             left = mid + 1;
     }
+    
+    std::cout << "For value: " << value << " total compares: " << _compare_count << std::endl;
 
     return left;
 }
@@ -82,6 +91,8 @@ void PmergeMe::fordJohnson(Container& c)
 
     for (size_t i = 0; i + 1 < c.size(); i += 2)
     {
+        ++_compare_count;
+        std::cout << "Comparing " << c[i] << " and " << c[i + 1] << std::endl;
         if (c[i] > c[i + 1])
             pairs.push_back(Pair(c[i], c[i+1]));
         else
@@ -97,34 +108,60 @@ void PmergeMe::fordJohnson(Container& c)
 
     fordJohnson(main);
 
-    for (size_t j = 0; j < pairs.size(); ++j)
-    {
-        if (main[0] == pairs[j].first)
-        {
-            main.insert(main.begin(), pairs[j].second);
-            pairs.erase(pairs.begin() + j);
-            break;
-        }
-    }
+    std::vector<Pair> sortedPairs;
+    sortedPairs.reserve(pairs.size());
 
-    std::vector<size_t> a_pos(pairs.size());
+    std::vector<bool> used(pairs.size(), false);
 
     for (size_t i = 0; i < main.size(); ++i)
     {
         for (size_t j = 0; j < pairs.size(); ++j)
         {
-            if (main[i] == pairs[j].first)
+            if (!used[j] && pairs[j].first == main[i])
             {
-                a_pos[j] = i;
+                sortedPairs.push_back(pairs[j]);
+                used[j] = true;
                 break;
             }
         }
     }
+    pairs = sortedPairs;
+
+
+    std::cout << "\nPairs before inserting:";
+    for (size_t i = 0; i < pairs.size(); ++i)
+        {
+            std::cout << pairs[i].first << "|" << pairs[i].second << " ";
+        }
+    std::cout << std::endl;
+
+    std::cout << "\nMain before inserting:";
+    for (size_t i = 0; i < main.size(); ++i)
+        {
+            std::cout << main[i] << " ";
+        }
+    std::cout << std::endl;
+
+    std::vector<size_t> a_pos(pairs.size());
+
+    for (size_t i = 0; i < pairs.size(); ++i)
+        a_pos[i] = i;
 
     std::vector<size_t> order = buildJacobsthalOrder(pairs.size());
 
+    for (size_t i = 0; i < order.size(); ++i)
+        std::cout << order[i] << " ";
+    std::cout << std::endl;
+
     for (size_t idx : order)
     {
+        if (idx == 0)
+        {
+            main.insert(main.begin(), pairs[idx].second);
+            for (size_t j = 0; j < a_pos.size(); ++j)
+                    ++a_pos[j];
+            continue;
+        }
         typename Container::iterator limit = main.begin() + a_pos[idx];
         typename Container::iterator pos = findInsertPosition(main, pairs[idx].second, limit);
         size_t ins_idx = std::distance(main.begin(), pos);
@@ -136,6 +173,13 @@ void PmergeMe::fordJohnson(Container& c)
             if (a_pos[j] >= ins_idx)
                 ++a_pos[j];
         }
+
+        std::cout << "a_pos: ";
+        for (size_t j = 0; j < a_pos.size(); ++j)
+        {
+            std::cout << a_pos[j] << " ";
+        }
+        std::cout << std::endl;
     }
 
     if (has_straggler)
@@ -145,6 +189,24 @@ void PmergeMe::fordJohnson(Container& c)
     }
 
     c = main;
+}
+
+template <typename Container>
+bool PmergeMe::isSorted(const Container &c) const
+{
+    if (c.size() < 2)
+        return true;
+
+    typename Container::const_iterator it = c.begin();
+    typename Container::const_iterator next = it;
+    ++next;
+
+    for (; next != c.end(); ++it, ++next)
+    {
+        if (*next < *it)
+            return false;
+    }
+    return true;
 }
 
 #endif

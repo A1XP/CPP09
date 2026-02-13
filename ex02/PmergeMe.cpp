@@ -38,7 +38,7 @@ void PmergeMe::sort(int argc, char **argv)
     parseInput(argc, argv);
 
     fordJohnsonVector();
-    fordJohnsonDeque();
+    // fordJohnsonDeque();
 
     print();
 }
@@ -109,6 +109,8 @@ void PmergeMe::fordJohnsonVector()
 {
     _mainVector = _inputVector; 
 
+    _compare_count = 0;
+
     auto start = std::chrono::high_resolution_clock::now();
 
     fordJohnson(_mainVector);
@@ -121,6 +123,8 @@ void PmergeMe::fordJohnsonVector()
 void PmergeMe::fordJohnsonDeque()
 {
     _mainDeque = _inputDeque;
+
+    _compare_count = 0;
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -146,10 +150,14 @@ void PmergeMe::print() const
     std::cout << "Time to process a range of "
               << _elements_amount
               << " elements with std::vector : "
-              << _vector_time << " us" << std::endl;
+              << _vector_time << " us"
+              << (isSorted(_mainVector) ? " (sorted)" : " (not sorted)") 
+              << "with compare count: " << _compare_count << std::endl;
 
     std::cout << "Time to process a range of "
               << _elements_amount
               << " elements with std::deque  : "
-              << _deque_time << " us" << std::endl;
+              << _deque_time << " us. Result:"
+              << (isSorted(_mainDeque) ? " (sorted) " : " (not sorted) ")
+              << "with compare count: " << _compare_count << std::endl;
 }
