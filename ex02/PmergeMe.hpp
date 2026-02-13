@@ -17,6 +17,7 @@ public:
     ~PmergeMe();
 
     void sort(int argc, char **argv);
+    void printbuildJacobsthalOrder(size_t n) const;
 
 private:
 
@@ -64,7 +65,6 @@ typename Container::iterator PmergeMe::findInsertPosition(Container& c, int valu
     while (left < right)
     {
         ++_compare_count;
-        std::cout << "std::distance(left, right)" << std::distance(left, right) << std::endl;
         typename Container::iterator mid =
             left + (std::distance(left, right) / 2);
         std ::cout << "Comparing " << value << " with " << *mid << std::endl;
@@ -73,8 +73,6 @@ typename Container::iterator PmergeMe::findInsertPosition(Container& c, int valu
         else
             left = mid + 1;
     }
-    
-    std::cout << "For value: " << value << " total compares: " << _compare_count << std::endl;
 
     return left;
 }
@@ -92,7 +90,6 @@ void PmergeMe::fordJohnson(Container& c)
     for (size_t i = 0; i + 1 < c.size(); i += 2)
     {
         ++_compare_count;
-        std::cout << "Comparing " << c[i] << " and " << c[i + 1] << std::endl;
         if (c[i] > c[i + 1])
             pairs.push_back(Pair(c[i], c[i+1]));
         else
@@ -127,31 +124,14 @@ void PmergeMe::fordJohnson(Container& c)
     }
     pairs = sortedPairs;
 
-
-    std::cout << "\nPairs before inserting:";
-    for (size_t i = 0; i < pairs.size(); ++i)
-        {
-            std::cout << pairs[i].first << "|" << pairs[i].second << " ";
-        }
-    std::cout << std::endl;
-
-    std::cout << "\nMain before inserting:";
-    for (size_t i = 0; i < main.size(); ++i)
-        {
-            std::cout << main[i] << " ";
-        }
-    std::cout << std::endl;
-
     std::vector<size_t> a_pos(pairs.size());
 
     for (size_t i = 0; i < pairs.size(); ++i)
         a_pos[i] = i;
 
-    std::vector<size_t> order = buildJacobsthalOrder(pairs.size());
+    size_t pending_count = pairs.size() + (has_straggler ? 1 : 0);
 
-    for (size_t i = 0; i < order.size(); ++i)
-        std::cout << order[i] << " ";
-    std::cout << std::endl;
+    std::vector<size_t> order = buildJacobsthalOrder(pending_count);
 
     for (size_t idx : order)
     {
@@ -162,30 +142,30 @@ void PmergeMe::fordJohnson(Container& c)
                     ++a_pos[j];
             continue;
         }
-        typename Container::iterator limit = main.begin() + a_pos[idx];
-        typename Container::iterator pos = findInsertPosition(main, pairs[idx].second, limit);
+        typename Container::iterator limit;
+        int value;
+
+        if (idx < pairs.size())
+        {
+            limit = main.begin() + a_pos[idx];
+            value = pairs[idx].second;
+        }
+        else
+        {
+            limit = main.end();
+            value = straggler;
+        }
+
+        typename Container::iterator pos = findInsertPosition(main, value, limit);
         size_t ins_idx = std::distance(main.begin(), pos);
 
-        main.insert(pos, pairs[idx].second);
+        main.insert(pos, value);
 
         for (size_t j = 0; j < a_pos.size(); ++j)
         {
             if (a_pos[j] >= ins_idx)
                 ++a_pos[j];
         }
-
-        std::cout << "a_pos: ";
-        for (size_t j = 0; j < a_pos.size(); ++j)
-        {
-            std::cout << a_pos[j] << " ";
-        }
-        std::cout << std::endl;
-    }
-
-    if (has_straggler)
-    {
-        typename Container::iterator pos = findInsertPosition(main, straggler, main.end());
-        main.insert(pos, straggler);
     }
 
     c = main;
